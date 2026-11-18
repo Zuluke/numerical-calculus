@@ -1,0 +1,241 @@
+\documentclass[11pt,a4paper]{article}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[brazil]{babel}
+\usepackage{lmodern}
+\usepackage[margin=2.2cm]{geometry}
+\usepackage{amsmath, amssymb}
+\usepackage{booktabs}
+\usepackage{array}
+\usepackage{tabularx}
+\usepackage{xcolor}
+\usepackage[most]{tcolorbox}
+\usepackage{enumitem}
+\usepackage{fancyhdr}
+\usepackage{hyperref}
+\usepackage[backend=bibtex, style=numeric, sorting=none]{biblatex}
+\addbibresource{3-reference/ref.bib}
+
+% ============================================================
+% PALETA DE CORES E CONFIGURAÇÃO DE HIPERLINKS
+% ============================================================
+\definecolor{primary}{RGB}{26, 115, 232}
+\definecolor{darkred}{RGB}{178, 34, 34}
+\definecolor{accent}{RGB}{46, 125, 50}
+\definecolor{graybg}{RGB}{246, 248, 250}
+
+\hypersetup{
+    colorlinks=true,
+    linkcolor=darkred,
+    urlcolor=primary,
+    citecolor=accent,
+    pdftitle={Plano de Aula - Integração Numérica: Método dos Trapézios},
+    pdfauthor={Prof. João Cardoso}
+}
+
+% Cabeçalho e Rodapé
+\pagestyle{fancy}
+\fancyhf{}
+\fancyhead[L]{\small \textcolor{darkred}{\textbf{Plano de Aula --- Cálculo Numérico}}}
+\fancyhead[R]{\small \textcolor{gray}{Prof. João Cardoso}}
+\fancyfoot[C]{\small \thepage}
+\renewcommand{\headrulewidth}{0.4pt}
+
+\newtcolorbox{destaquecaixa}[1]{
+    colback=graybg,
+    colframe=darkred,
+    fonttitle=\bfseries\small,
+    title=#1,
+    arc=2mm,
+    boxrule=0.8pt
+}
+
+\begin{document}
+
+% ============================================================
+% TÍTULO INSTITUCIONAL
+% ============================================================
+\begin{center}
+    {\LARGE \textbf{\textcolor{darkred}{PLANO DE AULA PARA A COORDENAÇÃO ACADÊMICA}}}\\[0.4em]
+    {\large \textbf{Integração Numérica: O Método dos Trapézios}}\\[0.2em]
+    {\normalsize Das Fórmulas de Newton-Cotes à Análise de Erro e Implementação em Python}\\[0.6em]
+    \rule{\textwidth}{1.2pt}
+\end{center}
+
+\vspace{0.2cm}
+
+% ============================================================
+% 1. IDENTIFICAÇÃO DA AULA
+% ============================================================
+\section{Identificação Geral}
+
+\begin{center}
+\renewcommand{\arraystretch}{1.28}
+\begin{tabularx}{\textwidth}{|>{\bfseries}p{4.3cm}|X|}
+\hline
+Disciplina & Cálculo Numérico / Métodos Numéricos \\
+\hline
+Docente Responsável & \textbf{Prof. João Cardoso} \\
+\hline
+Unidade Temática & Integração Numérica (Quadratura Numérica) \\
+\hline
+Tema da Aula & Método dos Trapézios (Simples e Composto), Análise de Erro e Implementação em Python \\
+\hline
+Duração Prevista & \textbf{30 minutos} (Exposição dialogada com demonstração computacional) \\
+\hline
+Modalidade e Recursos & Presencial com projeção de slides (\texttt{aulaMT.tex}), figuras de convergência, animações em vídeo e scripts em Python \\
+\hline
+Pré-requisitos & Cálculo Diferencial e Integral I (Teorema Fundamental do Cálculo, derivadas de ordem superior), Polinômios Interpoladores de Lagrange e Fórmulas de Newton-Cotes \\
+\hline
+Repositório Digital & \href{https://github.com/Zuluke/numerical-calculus.git}{\nolinkurl{https://github.com/Zuluke/numerical-calculus.git}} \\
+\hline
+\end{tabularx}
+\end{center}
+
+% ============================================================
+% 2. JUSTIFICATIVA E CONTEXTUALIZAÇÃO PEDAGÓGICA
+% ============================================================
+\section{Justificativa e Contextualização Curricular}
+
+A Integração Numérica constitui um dos pilares fundamentais da Computação Numérica e da Engenharia moderna, visto que problemas práticos frequentemente demandam o cálculo de integrais definidas $\int_a^b f(x)\,dx$ em situações nas quais o Teorema Fundamental do Cálculo é inaplicável: (i) quando $f(x)$ é conhecida apenas por uma tabela de dados discretos obtidos por sensores ou experimentos; ou (ii) quando $f(x)$ possui expressão analítica sem primitiva elementar em forma fechada (como $e^{-x^2}$ ou $\frac{\sin x}{x}$) \cite{santos2010, ruggiero1996, burden2016}.
+
+Esta aula ocupa posição estratégica de transição no plano da disciplina:
+\begin{itemize}[leftmargin=1.4em]
+    \item \textbf{Conexão com a aula anterior}: Resgata o arcabouço geral das \emph{Fórmulas Fechadas de Newton-Cotes} (baseadas na integração do polinômio interpolador de Lagrange $P_n(x)$) e demonstra como o caso mais elementar ($n = 1$) origina a Regra do Trapézio Simples.
+    \item \textbf{Aprofundamento na aula atual}: Justifica por que o refinamento composto (partição em $n$ subintervalos com retas secantes) supera polinômios globais de grau elevado (evitando o Fenômeno de Runge e pesos negativos), deduz o Método dos Trapézios Composto, analisa sua cota máxima de erro $O(h^2)$ e apresenta uma execução real comentada em Python com apoio visual (gráficos e animação em vídeo).
+    \item \textbf{Preparação para a aula seguinte}: Estabelece a motivação quantitativa para o \emph{Método de Simpson ($1/3$ e $3/8$)}, mostrando como elevar o grau local de $n=1$ (retas) para $n=2$ (parábolas) reduz a ordem do erro de $O(h^2)$ para $O(h^4)$ com o mesmo número de pontos amostrais \cite{mesquita2026}.
+\end{itemize}
+
+% ============================================================
+% 3. OBJETIVOS DE APRENDIZAGEM
+% ============================================================
+\section{Objetivos de Aprendizagem (Taxonomia de Bloom)}
+
+\subsection{Objetivo Geral}
+Capacitar os discentes a compreender, deduzir, aplicar e implementar computacionalmente o Método dos Trapézios (simples e composto) sob a ótica das Fórmulas de Newton-Cotes, avaliando rigorosamente seu erro de truncamento e sua ordem de convergência assintótica.
+
+\subsection{Objetivos Específicos}
+Ao término da aula e da resolução das atividades propostas, o estudante deverá ser capaz de:
+\begin{enumerate}[leftmargin=1.6em]
+    \item \textbf{Identificar e Contextualizar}: Reconhecer cenários científicos, físicos e computacionais (como cálculo de trabalho, probabilidades e métrica AUC-ROC) em que a integração numérica é indispensável.
+    \item \textbf{Deduzir}: Derivar os pesos $C_0^1 = C_1^1 = h/2$ a partir das Fórmulas de Newton-Cotes e generalizar a soma composta $I_T = h\left(\frac{E}{2} + I + P\right)$.
+    \item \textbf{Calcular e Analisar Erros}: Computar manualmente e em Python integrais definidas por trapézios, determinar o limitante teórico $|T_t| \le \frac{nh^3}{12}M_2$, prever superestimativas ou subestimativas pela concavidade ($f''(x)$) e dimensionar o número mínimo de subintervalos $n$ para uma tolerância $\varepsilon$.
+    \item \textbf{Implementar e Interpretar Visualmente}: Codificar o algoritmo vetorizado em Python/NumPy e interpretar gráficos de convergência log-log de ordem $O(h^2)$.
+\end{enumerate}
+
+% ============================================================
+% 4. CONTEÚDO PROGRAMÁTICO
+% ============================================================
+\section{Conteúdo Programático}
+
+\begin{itemize}[leftmargin=1.4em]
+    \item \textbf{Unidade 1 --- Motivação e Guarda-Chuva da Integração Numérica}: Limitações do cálculo analítico; funções tabuladas vs.\ integrais não elementares; recapitulação das Fórmulas de Newton-Cotes e coeficientes de Cotes $C_k^n$.
+    \item \textbf{Unidade 2 --- Formalismo Matemático do Método dos Trapézios}: Caso $n=1$ (Trapézio Simples); passagem para a Regra Composta em $n$ subintervalos iguais; agrupamento operacional ($E$, $I$, $P$); vantagens, estabilidade numérica e limitações.
+    \item \textbf{Unidade 3 --- Análise de Erro de Truncamento}: Erro local $T_i = -\frac{h^3}{12}f''(\eta_i)$ e erro global $|T_t| \le \frac{nh^3}{12}M_2$; ordem de convergência $O(h^2)$; influência do sinal de $f''(x)$; dimensionamento \emph{a priori} de $n$.
+    \item \textbf{Unidade 4 --- Aplicação Resolvida e Execução em Python}: Cálculo completo de $\int_{0,0}^{0,6} e^x\,dx$ com 7 pontos ($n=6$); comparação erro real vs.\ cota máxima; código vetorizado, gráficos de erro por subintervalo, gráfico log-log e vídeo animado da convergência.
+    \item \textbf{Unidade 5 --- Extensão, Atividade Extraclasse e Próxima Aula}: Desafio da integral gaussiana $\int_0^1 e^{-x^2}\,dx$; Quiz interativo de 15 questões; ponte para as Regras $1/3$ e $3/8$ de Simpson.
+\end{itemize}
+
+% ============================================================
+% 5. ROTEIRO DIDÁTICO E CRONOMETRAGEM (30 MINUTOS)
+% ============================================================
+\section{Matriz de Planejamento e Roteiro Didático (30 Minutos)}
+
+A aula expositiva dialogada foi rigorosamente estruturada para transcorrer em \textbf{30 minutos}, equilibrando fundamentação matemática, demonstração em código Python e apoio visual contínuo:
+
+\begin{center}
+\renewcommand{\arraystretch}{1.25}
+\small
+\begin{tabularx}{\textwidth}{|c|p{3.4cm}|X|p{2.3cm}|}
+\hline
+\textbf{Tempo} & \textbf{Momento / Bloco} & \textbf{Estratégia Didática e Conteúdo Abordado} & \textbf{Slides (Beamer)} \\
+\hline
+00--04 min & \textbf{1. Motivação e Recapitulação} & Abertura com problema motivador (integrais sem primitiva e dados tabulados; exemplo de AUC-ROC). Recapitulação rápida do guarda-chuva Newton-Cotes via diagrama visual. & Capa, Sumário, Slides 1 e 2 \\
+\hline
+04--09 min & \textbf{2. Dedução de Newton-Cotes ao Trapézio} & Cálculo explícito de $C_0^1$ e $C_1^1$. Contraste visual (\texttt{fig\_newton\_cotes\_trapezio.png}) entre Trapézio Simples e Composto; justificação contra polinômios de grau alto. & Slides 3 e 4 \\
+\hline
+09--16 min & \textbf{3. Regra Composta e Análise de Erro} & Dedução da fórmula $I_T \approx h(E/2 + I + P)$, discussão de vantagens/restrições, formalismo da cota $|T_t| \le \frac{nh^3}{12}M_2$, convergência $O(h^2)$ e papel da concavidade. & Slides 5 e 6 \\
+\hline
+16--22 min & \textbf{4. Exercício Resolvido Passo a Passo} & Resolução guiada de $\int_{0,0}^{0,6} e^x\,dx$ com 7 pontos ($n=6$): construção da tabela de pontos, cômputo de $I_T$, cálculo de $M_2 = e^{0,6}$ e comparação $|E_{\text{real}}| \le |T_t|_{\max}$. & Slides 7 e 8 \\
+\hline
+22--27 min & \textbf{5. Execução em Python, Gráficos e Vídeo} & Apresentação do código NumPy e saída no terminal; inspeção das figuras de erro por subintervalo, curva log-log $O(h^2)$ e exibição do vídeo animado (\texttt{animacao\_trapezios.mp4}). & Slides 9, 10, 11 e 12 \\
+\hline
+27--30 min & \textbf{6. Desafio, Quiz e Próxima Aula} & Apresentação do desafio da integral gaussiana ($\int_0^1 e^{-x^2}\,dx$), indicação do Quiz HTML (15 questões), links no GitHub e gancho comparativo para Simpson na próxima aula. & Slides 13, 14, 15 e 16 \\
+\hline
+\end{tabularx}
+\end{center}
+
+% ============================================================
+% 6. METODOLOGIA DE ENSINO E RECURSOS DIDÁTICOS
+% ============================================================
+\section{Metodologia de Ensino e Apoio Audiovisual}
+
+A metodologia combina \textbf{Exposição Dialogada Estruturada} com \textbf{Aprendizagem Visual Baseada em Evidência Computacional}:
+\begin{enumerate}[leftmargin=1.5em]
+    \item \textbf{Ancoragem Conceitual}: Em vez de apresentar a fórmula dos trapézios isoladamente, o método é deduzido como instância de grau $1$ das Fórmulas de Newton-Cotes, consolidando a visão unificada da disciplina \cite{santos2010, claudio1994}.
+    \item \textbf{Visualização Estática e Dinâmica (Python)}: Gráficos de erro local por subintervalo, gráficos log-log de convergência $O(h^2)$ e a animação em vídeo (\texttt{animacao\_trapezios.mp4} / \texttt{.gif}) permitem que o aluno observe geometricamente a redução da área residual à medida que $n$ cresce, favorecendo estilos de aprendizagem visual e cinestésico-computacional.
+    \item \textbf{Apoio Pós-Aula}: Todos os arquivos-fonte Python, o material técnico aprofundado (\texttt{material\_tecnico\_integracao\_numerica.tex}) e o quiz interativo (\texttt{quiz\_aula\_MT.html}) ficam disponíveis aos alunos no repositório oficial.
+\end{enumerate}
+
+\begin{destaquecaixa}{Recursos Tecnológicos e Materiais Disponibilizados}
+\begin{itemize}[leftmargin=1.3em]\small
+    \item \textbf{Slides Beamer}: \texttt{aulaMT.tex} (elaborado para exposição em até 30 minutos).
+    \item \textbf{Material Técnico Completo}: \texttt{material\_tecnico\_integracao\_numerica.tex} (referência aprofundada pós-aula).
+    \item \textbf{Scripts Python e Mídias}: \texttt{python/trapezios\_execucao.py}, \texttt{python/gerar\_figuras\_e\_videos.py}, gráficos em \texttt{images/} e animações em \texttt{videos/}.
+    \item \textbf{Repositório GitHub (Público)}: \href{https://github.com/Zuluke/numerical-calculus.git}{\nolinkurl{https://github.com/Zuluke/numerical-calculus.git}} \cite{cardoso2026_github}.
+\end{itemize}
+\end{destaquecaixa}
+
+% ============================================================
+% 7. AVALIAÇÃO DA APRENDIZAGEM E ATIVIDADE EXTRACLASSE
+% ============================================================
+\section{Avaliação da Aprendizagem}
+
+A verificação da aprendizagem ocorrerá de forma formativa e diagnóstica após a aula expositiva por meio de dois instrumentos complementares:
+\begin{enumerate}[leftmargin=1.5em]
+    \item \textbf{Quiz Interativo de Autoavaliação (\texttt{quiz\_aula\_MT.html})}: Lista de exercícios interativa contendo \textbf{15 questões objetivas} (equilibrando problemas conceituais de análise de erro/Newton-Cotes e exercícios numéricos com cálculos passo a passo), equipada com sistema de dicas pedagógicas, feedback imediato e gabarito comentado para todas as alternativas.
+    \item \textbf{Desafio Prático de Programação em Casa}: Implementação em Python da quadratura para a integral não elementar $\int_0^1 e^{-x^2}\,dx$ com dimensionamento automático de $n$ para tolerância $\varepsilon = 10^{-5}$ ($n_{\min} = 130$), incentivando o uso do algoritmo desenvolvido em sala.
+\end{enumerate}
+
+% ============================================================
+% 8. INDICAÇÃO DA PRÓXIMA AULA
+% ============================================================
+\section{Planejamento da Aula Seguinte}
+
+\textbf{Tema}: \emph{Integração Numérica --- Métodos de Simpson ($1/3$ e $3/8$) e Comparação Analítica de Erros} \cite{mesquita2026, santos2010}.\\
+Na continuidade imediata, será deduzida a aproximação por polinômios interpoladores de grau $2$ (Regra $1/3$ de Simpson, exigindo $n$ par, erro $|T_S| \le \frac{nh^5}{180}M_4$) e de grau $3$ (Regra $3/8$ de Simpson, $n$ múltiplo de $3$, erro $|T_{3/8}| \le \frac{nh^5}{80}M_4$), comparando-se o ganho de precisão $O(h^4)$ frente ao $O(h^2)$ dos trapézios no mesmo problema-modelo $\int_{0,0}^{0,6} e^x\,dx$.
+
+% ============================================================
+% 9. MATERIAIS EXTRAS, VÍDEOS E HYPERLINKS EXPLÍCITOS
+% ============================================================
+\section{Links Explícitos e Vídeos de Apoio}
+
+\begin{itemize}[leftmargin=1.4em]\small
+    \item \textbf{Repositório GitHub da Disciplina (Prof. João Cardoso)}: \\
+    \href{https://github.com/Zuluke/numerical-calculus.git}{\nolinkurl{https://github.com/Zuluke/numerical-calculus.git}}
+    \item \textbf{Notas de Aula e Materiais --- CIn/UFPE (Prof. Rafael Mesquita)}: \\
+    \href{https://cin.ufpe.br/~rgm/metodosnumericos/}{\nolinkurl{https://cin.ufpe.br/~rgm/metodosnumericos/}}
+    \item \textbf{Ementa e Bibliografia MS211 --- IMECC/UNICAMP}: \\
+    \href{https://disciplinas.ime.unicamp.br/ms211/ementa/}{\nolinkurl{https://disciplinas.ime.unicamp.br/ms211/ementa/}}
+    \item \textbf{Vídeoaula Extra (Português) --- UNIVESP (Integração Numérica e Regra dos Trapézios)}: \\
+    \href{https://www.youtube.com/playlist?list=PLxI8Can9yAHdCutIICyWcGI0s-fbpw3fc}{\nolinkurl{https://www.youtube.com/playlist?list=PLxI8Can9yAHdCutIICyWcGI0s-fbpw3fc}}
+    \item \textbf{Vídeoaula Extra (Inglês) --- Khan Academy (Trapezoidal Approximation)}: \\
+    \href{https://www.youtube.com/watch?v=1p0NHR5w0Lc}{\nolinkurl{https://www.youtube.com/watch?v=1p0NHR5w0Lc}}
+    \item \textbf{Referência Técnica da Biblioteca SciPy (\texttt{scipy.integrate.trapezoid})}: \\
+    \href{https://docs.scipy.org/doc/scipy/reference/generated/scipy.integrate.trapezoid.html}{\nolinkurl{https://docs.scipy.org/doc/scipy/reference/generated/scipy.integrate.trapezoid.html}}
+\end{itemize}
+
+% ============================================================
+% 10. REFERÊNCIAS BIBLIOGRÁFICAS
+% ============================================================
+\nocite{*}
+\printbibliography[title={Referências Bibliográficas}]
+
+\vspace{0.8cm}
+\begin{flushright}
+\rule{6.5cm}{0.6pt}\\
+\textbf{Prof. João Cardoso}\\
+Docente de Cálculo Numérico
+\end{flushright}
+
+\end{document}
