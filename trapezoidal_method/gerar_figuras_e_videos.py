@@ -338,7 +338,7 @@ def gerar_fig_animacao_frames_e_videos() -> None:
         ax_right.set_ylim(5e-4, 5e0)
         ax_right.legend(loc="upper right")
 
-        fig_anim.suptitle("Método dos Trapézios: Convergência Visual em Python (Prof. João Cardoso)", fontsize=12, fontweight="bold")
+        fig_anim.suptitle("Método dos Trapézios: Convergência Visual em Python", fontsize=12, fontweight="bold")
         fig_anim.tight_layout(rect=[0, 0, 1, 0.93])
 
         # Renderiza quadro para buffer RGB
@@ -347,6 +347,12 @@ def gerar_fig_animacao_frames_e_videos() -> None:
         frames_rgb.append(buf)
 
     plt.close(fig_anim)
+
+    # Salvar quadros individuais PNG para incorporacao nativa no PDF via pacote animate
+    frames_dir = VID_DIR / "frames"
+    frames_dir.mkdir(parents=True, exist_ok=True)
+    for idx_f, fr in enumerate(frames_rgb):
+        imageio.imwrite(frames_dir / f"frame_{idx_f:02d}.png", fr)
 
     # Salvar GIF (com pausa extra no último frame)
     frames_gif = frames_rgb + [frames_rgb[-1]] * 4
